@@ -10,12 +10,23 @@
         --bg: #fafafa;
         --fg: #0a0a0a;
         --muted: #525252;
+        --border: #e5e5e5;
+        --surface: #ffffff;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --danger: #b91c1c;
+        --radius: 10px;
       }
       @media (prefers-color-scheme: dark) {
         :root {
           --bg: #0a0a0a;
           --fg: #fafafa;
           --muted: #a3a3a3;
+          --border: #262626;
+          --surface: #141414;
+          --accent: #3b82f6;
+          --accent-hover: #60a5fa;
+          --danger: #f87171;
         }
       }
       * {
@@ -24,23 +35,394 @@
       body {
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
         background: var(--bg);
         color: var(--fg);
+        line-height: 1.5;
+      }
+      .page {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) 4rem;
       }
       h1 {
-        margin: 0;
+        margin: 0 0 2rem;
         font-size: clamp(2rem, 6vw, 3.5rem);
         font-weight: 600;
         letter-spacing: -0.02em;
       }
+      h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+      p {
+        margin: 0 0 1rem;
+        color: var(--muted);
+        font-size: 0.9375rem;
+      }
+      a {
+        color: var(--accent);
+      }
+      a:hover {
+        color: var(--accent-hover);
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.35rem;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        margin-bottom: 1rem;
+      }
+      .field label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .field input[type="password"],
+      .field input[type="text"] {
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        font-size: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .field input:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1rem;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        border: 1px solid transparent;
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      button.primary:hover:not(:disabled) {
+        background: var(--accent-hover);
+      }
+      button.secondary {
+        background: transparent;
+        color: var(--fg);
+        border-color: var(--border);
+      }
+      button.secondary:hover:not(:disabled) {
+        background: var(--border);
+      }
+      button.danger {
+        background: transparent;
+        color: var(--danger);
+        border-color: var(--border);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 0.875rem;
+        margin-top: 0.75rem;
+        color: var(--muted);
+      }
+      .status.error {
+        color: var(--danger);
+      }
+      .collection-meta {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
+      .collection-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: min(60vh, 28rem);
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .collection-list li {
+        padding: 0.6rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9375rem;
+      }
+      .collection-list li:last-child {
+        border-bottom: none;
+      }
+      .collection-list .title {
+        font-weight: 500;
+        color: var(--fg);
+      }
+      .collection-list .meta {
+        font-size: 0.8125rem;
+        color: var(--muted);
+      }
+      .hidden {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Currents</h1>
-    </main>
+    <div class="page">
+      <header>
+        <h1>Currents</h1>
+      </header>
+
+      <section class="card" aria-labelledby="discogs-heading">
+        <h2 id="discogs-heading">Discogs collection</h2>
+        <p>
+          Connect with a
+          <a href="https://www.discogs.com/settings/developers" rel="noopener noreferrer">personal token</a>
+          from your Discogs developer settings, then load your collection. Your token stays in this browser
+          session only (not sent to Currents).
+        </p>
+
+        <div id="login-panel">
+          <div class="field">
+            <label for="discogs-token">Personal access token</label>
+            <input
+              id="discogs-token"
+              type="password"
+              name="discogs_token"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste token from Discogs"
+            />
+          </div>
+          <div class="row">
+            <button type="button" class="primary" id="btn-connect">Connect</button>
+          </div>
+        </div>
+
+        <div id="connected-panel" class="hidden">
+          <p id="user-line" style="margin-bottom: 1rem; color: var(--fg)"></p>
+          <div class="row">
+            <button type="button" class="primary" id="btn-load">Load collection</button>
+            <button type="button" class="secondary" id="btn-disconnect">Sign out</button>
+          </div>
+        </div>
+
+        <div id="status-line" class="status" role="status" aria-live="polite"></div>
+
+        <div id="collection-wrap" class="hidden" style="margin-top: 1.25rem">
+          <p class="collection-meta" id="collection-meta"></p>
+          <ul class="collection-list" id="collection-list"></ul>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const UA = "Currents/1.0 +https://github.com/pages";
+        const STORAGE_KEY = "discogs_token";
+
+        const el = {
+          loginPanel: document.getElementById("login-panel"),
+          connectedPanel: document.getElementById("connected-panel"),
+          tokenInput: document.getElementById("discogs-token"),
+          btnConnect: document.getElementById("btn-connect"),
+          btnLoad: document.getElementById("btn-load"),
+          btnDisconnect: document.getElementById("btn-disconnect"),
+          userLine: document.getElementById("user-line"),
+          statusLine: document.getElementById("status-line"),
+          collectionWrap: document.getElementById("collection-wrap"),
+          collectionMeta: document.getElementById("collection-meta"),
+          collectionList: document.getElementById("collection-list"),
+        };
+
+        let username = null;
+
+        function authHeaders(token) {
+          return {
+            Authorization: "Discogs token=" + token,
+            "User-Agent": UA,
+            Accept: "application/json",
+          };
+        }
+
+        async function discogsFetch(path, token) {
+          const res = await fetch("https://api.discogs.com" + path, {
+            headers: authHeaders(token),
+          });
+          const text = await res.text();
+          let data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch {
+            data = null;
+          }
+          if (!res.ok) {
+            const msg =
+              data && data.message
+                ? data.message
+                : "Request failed (" + res.status + ")";
+            throw new Error(msg);
+          }
+          return data;
+        }
+
+        function setStatus(message, isError) {
+          el.statusLine.textContent = message || "";
+          el.statusLine.classList.toggle("error", !!isError);
+        }
+
+        function showConnected(user) {
+          username = user;
+          el.loginPanel.classList.add("hidden");
+          el.connectedPanel.classList.remove("hidden");
+          el.userLine.textContent = "Signed in as " + user + ".";
+        }
+
+        function showLogin() {
+          username = null;
+          el.loginPanel.classList.remove("hidden");
+          el.connectedPanel.classList.add("hidden");
+          el.collectionWrap.classList.add("hidden");
+          el.collectionList.innerHTML = "";
+          el.tokenInput.value = "";
+        }
+
+        function releaseLabel(entry) {
+          const bi = entry.basic_information || {};
+          const artists = (bi.artists || []).map(function (a) {
+            return a.name;
+          });
+          const artistStr = artists.length ? artists.join(", ") : "Unknown artist";
+          const title = bi.title || "(no title)";
+          const primary = artistStr + " — " + title;
+          const subParts = [];
+          if (bi.year) subParts.push(String(bi.year));
+          const fmt = bi.formats && bi.formats[0] && bi.formats[0].name;
+          if (fmt) subParts.push(fmt);
+          return { primary: primary, sub: subParts.join(" · ") };
+        }
+
+        async function loadCollection(token) {
+          setStatus("Loading collection…");
+          el.btnLoad.disabled = true;
+          el.collectionWrap.classList.add("hidden");
+          el.collectionList.innerHTML = "";
+
+          const perPage = 100;
+          const all = [];
+
+          try {
+            const base =
+              "/users/" +
+              encodeURIComponent(username) +
+              "/collection/folders/0/releases?per_page=" +
+              perPage +
+              "&page=";
+            const first = await discogsFetch(base + "1", token);
+            const pag = first.pagination || {};
+            const totalPages = pag.pages != null ? pag.pages : 1;
+            const firstBatch = first.releases || [];
+            for (let i = 0; i < firstBatch.length; i++) {
+              all.push(firstBatch[i]);
+            }
+            for (let p = 2; p <= totalPages; p++) {
+              setStatus("Loading collection… page " + p + " of " + totalPages);
+              const data = await discogsFetch(base + String(p), token);
+              const batch = data.releases || [];
+              for (let j = 0; j < batch.length; j++) {
+                all.push(batch[j]);
+              }
+            }
+
+            el.collectionMeta.textContent =
+              all.length + " release" + (all.length === 1 ? "" : "s") + " in your collection (All folder).";
+            for (let j = 0; j < all.length; j++) {
+              const item = document.createElement("li");
+              const lab = releaseLabel(all[j]);
+              item.innerHTML =
+                '<div class="title"></div><div class="meta"></div>';
+              item.querySelector(".title").textContent = lab.primary;
+              item.querySelector(".meta").textContent = lab.sub;
+              el.collectionList.appendChild(item);
+            }
+            el.collectionWrap.classList.remove("hidden");
+            setStatus("Collection loaded.");
+          } catch (err) {
+            setStatus(err.message || "Could not load collection.", true);
+          } finally {
+            el.btnLoad.disabled = false;
+          }
+        }
+
+        el.btnConnect.addEventListener("click", async function () {
+          const token = el.tokenInput.value.trim();
+          if (!token) {
+            setStatus("Enter your Discogs personal token.", true);
+            return;
+          }
+          setStatus("Verifying token…");
+          el.btnConnect.disabled = true;
+          try {
+            const identity = await discogsFetch("/oauth/identity", token);
+            const user = identity.username;
+            if (!user) throw new Error("Could not read username from Discogs.");
+            sessionStorage.setItem(STORAGE_KEY, token);
+            showConnected(user);
+            setStatus("Connected. You can load your collection when ready.");
+          } catch (err) {
+            setStatus(err.message || "Connection failed.", true);
+          } finally {
+            el.btnConnect.disabled = false;
+          }
+        });
+
+        el.btnDisconnect.addEventListener("click", function () {
+          sessionStorage.removeItem(STORAGE_KEY);
+          showLogin();
+          setStatus("Signed out.");
+        });
+
+        el.btnLoad.addEventListener("click", function () {
+          const token = sessionStorage.getItem(STORAGE_KEY);
+          if (!token || !username) {
+            setStatus("Connect first.", true);
+            return;
+          }
+          loadCollection(token);
+        });
+
+        (function initSession() {
+          const token = sessionStorage.getItem(STORAGE_KEY);
+          if (!token) return;
+          el.btnConnect.disabled = true;
+          setStatus("Restoring session…");
+          discogsFetch("/oauth/identity", token)
+            .then(function (identity) {
+              const user = identity.username;
+              if (!user) throw new Error("Invalid session.");
+              showConnected(user);
+              setStatus("");
+            })
+            .catch(function () {
+              sessionStorage.removeItem(STORAGE_KEY);
+              setStatus("Previous session expired. Connect again.", true);
+            })
+            .finally(function () {
+              el.btnConnect.disabled = false;
+            });
+        })();
+      })();
+    </script>
   </body>
 </html>
