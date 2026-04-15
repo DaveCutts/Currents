@@ -40,7 +40,30 @@
         color: var(--fg);
         line-height: 1.5;
       }
+      .site-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-color: var(--bg);
+        background-image: linear-gradient(
+            rgba(250, 250, 250, 0.78),
+            rgba(250, 250, 250, 0.86)
+          ),
+          url("background.jpg");
+        background-size: cover, cover;
+        background-position: center, center;
+        background-repeat: no-repeat, no-repeat;
+      }
+      @media (prefers-color-scheme: dark) {
+        .site-bg {
+          background-image: linear-gradient(rgba(10, 10, 10, 0.72), rgba(10, 10, 10, 0.84)),
+            url("background.jpg");
+        }
+      }
       .page {
+        position: relative;
+        z-index: 1;
         max-width: 42rem;
         margin: 0 auto;
         padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) 4rem;
@@ -158,12 +181,34 @@
         border-radius: 8px;
       }
       .collection-list li {
-        padding: 0.6rem 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.85rem;
         border-bottom: 1px solid var(--border);
         font-size: 0.9375rem;
       }
       .collection-list li:last-child {
         border-bottom: none;
+      }
+      .collection-list .collection-thumb-wrap {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--border);
+        align-self: center;
+      }
+      .collection-list .collection-thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .collection-list .collection-text {
+        min-width: 0;
+        flex: 1;
       }
       .collection-list .title {
         font-weight: 500;
@@ -176,9 +221,39 @@
       .hidden {
         display: none !important;
       }
+      .playlist-heading {
+        margin: 0 0 0.35rem;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      .playlist-list {
+        margin: 0;
+        padding-left: 1.35rem;
+        max-height: min(50vh, 22rem);
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-right: 0.75rem;
+      }
+      .playlist-list li {
+        padding: 0.35rem 0;
+        font-size: 0.9375rem;
+      }
+      .playlist-list .track {
+        font-weight: 500;
+        color: var(--fg);
+      }
+      .playlist-list .from {
+        font-size: 0.8125rem;
+        color: var(--muted);
+        margin-top: 0.15rem;
+      }
     </style>
   </head>
   <body>
+    <div class="site-bg" role="presentation" aria-hidden="true"></div>
     <div class="page">
       <header>
         <h1>Currents</h1>
@@ -189,8 +264,8 @@
         <p>
           Connect with a
           <a href="https://www.discogs.com/settings/developers" rel="noopener noreferrer">personal token</a>
-          from your Discogs developer settings, then load your collection. Your token stays in this browser
-          session only (not sent to Currents).
+          from your Discogs developer settings. Your collection loads automatically, sorted A–Z by artist. Your
+          token stays in this browser session only (not sent to Currents).
         </p>
 
         <div id="login-panel">
@@ -214,6 +289,7 @@
           <p id="user-line" style="margin-bottom: 1rem; color: var(--fg)"></p>
           <div class="row">
             <button type="button" class="primary" id="btn-load">Load collection</button>
+            <button type="button" class="secondary" id="btn-playlist">Generate playlist</button>
             <button type="button" class="secondary" id="btn-disconnect">Sign out</button>
           </div>
         </div>
@@ -223,6 +299,15 @@
         <div id="collection-wrap" class="hidden" style="margin-top: 1.25rem">
           <p class="collection-meta" id="collection-meta"></p>
           <ul class="collection-list" id="collection-list"></ul>
+        </div>
+
+        <div id="playlist-wrap" class="hidden" style="margin-top: 1.25rem">
+          <h3 class="playlist-heading" id="playlist-heading">Suggested playlist</h3>
+          <p class="collection-meta" id="playlist-meta"></p>
+          <div class="row" style="margin-bottom: 0.75rem">
+            <button type="button" class="secondary" id="btn-copy-playlist">Copy as text</button>
+          </div>
+          <ol class="playlist-list" id="playlist-list"></ol>
         </div>
       </section>
     </div>
@@ -238,15 +323,24 @@
           tokenInput: document.getElementById("discogs-token"),
           btnConnect: document.getElementById("btn-connect"),
           btnLoad: document.getElementById("btn-load"),
+          btnPlaylist: document.getElementById("btn-playlist"),
           btnDisconnect: document.getElementById("btn-disconnect"),
+          btnCopyPlaylist: document.getElementById("btn-copy-playlist"),
           userLine: document.getElementById("user-line"),
           statusLine: document.getElementById("status-line"),
           collectionWrap: document.getElementById("collection-wrap"),
           collectionMeta: document.getElementById("collection-meta"),
           collectionList: document.getElementById("collection-list"),
+          playlistWrap: document.getElementById("playlist-wrap"),
+          playlistMeta: document.getElementById("playlist-meta"),
+          playlistList: document.getElementById("playlist-list"),
         };
 
+        const PLAYLIST_TRACK_COUNT = 12;
+
         let username = null;
+        let collectionCache = null;
+        let playlistCopyText = "";
 
         function authHeaders(token) {
           return {
@@ -291,11 +385,205 @@
 
         function showLogin() {
           username = null;
+          collectionCache = null;
+          playlistCopyText = "";
           el.loginPanel.classList.remove("hidden");
           el.connectedPanel.classList.add("hidden");
           el.collectionWrap.classList.add("hidden");
           el.collectionList.innerHTML = "";
+          el.playlistWrap.classList.add("hidden");
+          el.playlistList.innerHTML = "";
           el.tokenInput.value = "";
+        }
+
+        function shuffleInPlace(arr) {
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = arr[i];
+            arr[i] = arr[j];
+            arr[j] = t;
+          }
+          return arr;
+        }
+
+        function collectionArtistName(entry) {
+          const bi = entry.basic_information || {};
+          const artists = (bi.artists || []).map(function (a) {
+            return a.name;
+          });
+          return artists.length ? artists.join(", ") : "Unknown artist";
+        }
+
+        function collectionReleaseTitle(entry) {
+          const bi = entry.basic_information || {};
+          return (bi.title || "").trim() || "(no title)";
+        }
+
+        function sortCollectionByArtist(entries) {
+          return entries.slice().sort(function (a, b) {
+            const byArtist = collectionArtistName(a).localeCompare(collectionArtistName(b), undefined, {
+              sensitivity: "base",
+            });
+            if (byArtist !== 0) return byArtist;
+            return collectionReleaseTitle(a).localeCompare(collectionReleaseTitle(b), undefined, {
+              sensitivity: "base",
+            });
+          });
+        }
+
+        async function fetchCollectionReleases(token, onProgress) {
+          const perPage = 100;
+          const all = [];
+          const base =
+            "/users/" +
+            encodeURIComponent(username) +
+            "/collection/folders/0/releases?per_page=" +
+            perPage +
+            "&page=";
+          const first = await discogsFetch(base + "1", token);
+          const pag = first.pagination || {};
+          const totalPages = pag.pages != null ? pag.pages : 1;
+          const firstBatch = first.releases || [];
+          for (let i = 0; i < firstBatch.length; i++) {
+            all.push(firstBatch[i]);
+          }
+          if (onProgress) onProgress(1, totalPages);
+          for (let p = 2; p <= totalPages; p++) {
+            if (onProgress) onProgress(p, totalPages);
+            const data = await discogsFetch(base + String(p), token);
+            const batch = data.releases || [];
+            for (let j = 0; j < batch.length; j++) {
+              all.push(batch[j]);
+            }
+          }
+          return sortCollectionByArtist(all);
+        }
+
+        function releaseDefaultArtists(release) {
+          const list = release.artists || [];
+          const names = list.map(function (a) {
+            return a.name;
+          });
+          return names.length ? names.join(", ") : "Unknown artist";
+        }
+
+        function playableTracksFromRelease(release) {
+          const releaseArtists = releaseDefaultArtists(release);
+          const tracklist = release.tracklist || [];
+          const out = [];
+          for (let i = 0; i < tracklist.length; i++) {
+            const tr = tracklist[i];
+            const type = tr.type_;
+            if (type === "heading") continue;
+            const title = (tr.title || "").trim();
+            if (!title) continue;
+            let artist = releaseArtists;
+            if (tr.artists && tr.artists.length) {
+              artist = tr.artists
+                .map(function (a) {
+                  return a.name;
+                })
+                .join(", ");
+            }
+            out.push({ artist: artist, title: title });
+          }
+          return out;
+        }
+
+        function pickRandom(arr) {
+          if (!arr.length) return null;
+          return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        async function generatePlaylist(token) {
+          el.playlistWrap.classList.add("hidden");
+          el.playlistList.innerHTML = "";
+          playlistCopyText = "";
+          el.btnPlaylist.disabled = true;
+          el.btnLoad.disabled = true;
+
+          try {
+            let entries = collectionCache;
+            if (!entries || !entries.length) {
+              setStatus("Loading your collection for the playlist…");
+              entries = await fetchCollectionReleases(token, function (p, total) {
+                setStatus("Loading collection… page " + p + " of " + total);
+              });
+              collectionCache = entries;
+            }
+
+            if (!entries.length) {
+              setStatus("Your collection is empty.", true);
+              return;
+            }
+
+            const want = Math.min(PLAYLIST_TRACK_COUNT, entries.length);
+            const pool = entries.slice();
+            shuffleInPlace(pool);
+            const chosen = pool.slice(0, want);
+
+            const tracks = [];
+            for (let i = 0; i < chosen.length; i++) {
+              const entry = chosen[i];
+              const bi = entry.basic_information || {};
+              const rid = bi.id;
+              const releaseTitle = bi.title || "Release";
+              const collArtists = (bi.artists || [])
+                .map(function (a) {
+                  return a.name;
+                })
+                .join(", ");
+              setStatus("Building playlist… " + (i + 1) + " of " + chosen.length);
+              if (!rid) continue;
+              const rel = await discogsFetch("/releases/" + rid, token);
+              const playable = playableTracksFromRelease(rel);
+              const pick = pickRandom(playable);
+              if (pick) {
+                tracks.push({
+                  artist: pick.artist,
+                  title: pick.title,
+                  from: (collArtists || pick.artist) + " — " + releaseTitle,
+                });
+              } else {
+                tracks.push({
+                  artist: collArtists || releaseDefaultArtists(rel),
+                  title: releaseTitle,
+                  from: releaseTitle + " (release)",
+                });
+              }
+            }
+
+            if (!tracks.length) {
+              setStatus("Could not build a playlist from your collection.", true);
+              return;
+            }
+
+            el.playlistMeta.textContent =
+              tracks.length +
+              " track" +
+              (tracks.length === 1 ? "" : "s") +
+              " chosen at random from your collection.";
+            const lines = [];
+            for (let t = 0; t < tracks.length; t++) {
+              const item = document.createElement("li");
+              const tr = tracks[t];
+              const line = tr.artist + " — " + tr.title;
+              lines.push(String(t + 1) + ". " + line);
+              item.innerHTML =
+                '<div class="track"></div><div class="from"></div>';
+              item.querySelector(".track").textContent = line;
+              item.querySelector(".from").textContent = "From: " + tr.from;
+              el.playlistList.appendChild(item);
+            }
+            playlistCopyText = lines.join("\n");
+            el.playlistWrap.classList.remove("hidden");
+            setStatus("Playlist ready.");
+          } catch (err) {
+            setStatus(err.message || "Could not generate playlist.", true);
+          } finally {
+            el.btnPlaylist.disabled = false;
+            el.btnLoad.disabled = false;
+          }
         }
 
         function releaseLabel(entry) {
@@ -313,47 +601,59 @@
           return { primary: primary, sub: subParts.join(" · ") };
         }
 
+        function collectionThumbUrl(entry) {
+          const bi = entry.basic_information || {};
+          return (bi.thumb || bi.cover_image || "").trim();
+        }
+
         async function loadCollection(token) {
           setStatus("Loading collection…");
           el.btnLoad.disabled = true;
+          el.btnPlaylist.disabled = true;
           el.collectionWrap.classList.add("hidden");
           el.collectionList.innerHTML = "";
-
-          const perPage = 100;
-          const all = [];
+          el.playlistWrap.classList.add("hidden");
+          playlistCopyText = "";
 
           try {
-            const base =
-              "/users/" +
-              encodeURIComponent(username) +
-              "/collection/folders/0/releases?per_page=" +
-              perPage +
-              "&page=";
-            const first = await discogsFetch(base + "1", token);
-            const pag = first.pagination || {};
-            const totalPages = pag.pages != null ? pag.pages : 1;
-            const firstBatch = first.releases || [];
-            for (let i = 0; i < firstBatch.length; i++) {
-              all.push(firstBatch[i]);
-            }
-            for (let p = 2; p <= totalPages; p++) {
-              setStatus("Loading collection… page " + p + " of " + totalPages);
-              const data = await discogsFetch(base + String(p), token);
-              const batch = data.releases || [];
-              for (let j = 0; j < batch.length; j++) {
-                all.push(batch[j]);
-              }
-            }
+            const all = await fetchCollectionReleases(token, function (p, total) {
+              setStatus("Loading collection… page " + p + " of " + total);
+            });
+            collectionCache = all;
 
             el.collectionMeta.textContent =
-              all.length + " release" + (all.length === 1 ? "" : "s") + " in your collection (All folder).";
+              all.length +
+              " release" +
+              (all.length === 1 ? "" : "s") +
+              " in your collection (All folder), sorted A–Z by artist.";
             for (let j = 0; j < all.length; j++) {
               const item = document.createElement("li");
               const lab = releaseLabel(all[j]);
-              item.innerHTML =
-                '<div class="title"></div><div class="meta"></div>';
-              item.querySelector(".title").textContent = lab.primary;
-              item.querySelector(".meta").textContent = lab.sub;
+              const thumbWrap = document.createElement("div");
+              thumbWrap.className = "collection-thumb-wrap";
+              thumbWrap.setAttribute("aria-hidden", "true");
+              const thumbSrc = collectionThumbUrl(all[j]);
+              if (thumbSrc) {
+                const img = document.createElement("img");
+                img.className = "collection-thumb";
+                img.alt = "";
+                img.loading = "lazy";
+                img.decoding = "async";
+                img.src = thumbSrc;
+                thumbWrap.appendChild(img);
+              }
+              const textWrap = document.createElement("div");
+              textWrap.className = "collection-text";
+              const titleEl = document.createElement("div");
+              titleEl.className = "title";
+              titleEl.textContent = lab.primary;
+              const metaEl = document.createElement("div");
+              metaEl.className = "meta";
+              metaEl.textContent = lab.sub;
+              textWrap.appendChild(titleEl);
+              textWrap.appendChild(metaEl);
+              item.appendChild(thumbWrap);
+              item.appendChild(textWrap);
               el.collectionList.appendChild(item);
             }
             el.collectionWrap.classList.remove("hidden");
@@ -362,6 +662,7 @@
             setStatus(err.message || "Could not load collection.", true);
           } finally {
             el.btnLoad.disabled = false;
+            el.btnPlaylist.disabled = false;
           }
         }
 
@@ -379,7 +680,7 @@
             if (!user) throw new Error("Could not read username from Discogs.");
             sessionStorage.setItem(STORAGE_KEY, token);
             showConnected(user);
-            setStatus("Connected. You can load your collection when ready.");
+            await loadCollection(token);
           } catch (err) {
             setStatus(err.message || "Connection failed.", true);
           } finally {
@@ -402,17 +703,36 @@
           loadCollection(token);
         });
 
+        el.btnPlaylist.addEventListener("click", function () {
+          const token = sessionStorage.getItem(STORAGE_KEY);
+          if (!token || !username) {
+            setStatus("Connect first.", true);
+            return;
+          }
+          generatePlaylist(token);
+        });
+
+        el.btnCopyPlaylist.addEventListener("click", async function () {
+          if (!playlistCopyText) return;
+          try {
+            await navigator.clipboard.writeText(playlistCopyText);
+            setStatus("Playlist copied to clipboard.");
+          } catch {
+            setStatus("Could not copy automatically. Select the list and copy manually.", true);
+          }
+        });
+
         (function initSession() {
           const token = sessionStorage.getItem(STORAGE_KEY);
           if (!token) return;
           el.btnConnect.disabled = true;
           setStatus("Restoring session…");
           discogsFetch("/oauth/identity", token)
-            .then(function (identity) {
+            .then(async function (identity) {
               const user = identity.username;
               if (!user) throw new Error("Invalid session.");
               showConnected(user);
-              setStatus("");
+              await loadCollection(token);
             })
             .catch(function () {
               sessionStorage.removeItem(STORAGE_KEY);
