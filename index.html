@@ -1235,6 +1235,8 @@
 
         function normalizeSpotifySearchText(value) {
           return String(value || "")
+            .normalize("NFKD")
+            .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
             .replace(/\([^)]*\)/g, " ")
             .replace(/\[[^\]]*\]/g, " ")
@@ -1278,6 +1280,8 @@
           const trackTitle = normalizeSpotifySearchText(trackTitleRaw) || trackTitleRaw;
           const shortTitle = trackTitle.split("-")[0].trim();
           const bareTitle = trackTitle.split(" ").slice(0, 4).join(" ").trim();
+          const rawShortTitle = trackTitleRaw.split("-")[0].trim();
+          const rawBareTitle = trackTitleRaw.split(" ").slice(0, 4).join(" ").trim();
 
           async function searchTracks(q) {
             const data = await spotifyApiGet(
@@ -1290,16 +1294,29 @@
 
           try {
             const queries = [
+              'artist:"' + primaryArtistRaw + '" track:"' + trackTitleRaw + '"',
+              primaryArtistRaw + " " + trackTitleRaw,
+              trackTitleRaw + " " + primaryArtistRaw,
+              'track:"' + trackTitleRaw + '"',
               'artist:"' + primaryArtist + '" track:"' + trackTitle + '"',
               primaryArtist + " " + trackTitle,
               'track:"' + trackTitle + '"',
             ];
+            if (rawShortTitle && rawShortTitle !== trackTitleRaw) {
+              queries.push(primaryArtistRaw + " " + rawShortTitle);
+              queries.push('track:"' + rawShortTitle + '"');
+            }
+            if (rawBareTitle && rawBareTitle !== trackTitleRaw) {
+              queries.push(primaryArtistRaw + " " + rawBareTitle);
+            }
             if (shortTitle && shortTitle !== trackTitle) queries.push(primaryArtist + " " + shortTitle);
             if (bareTitle && bareTitle !== trackTitle) queries.push(primaryArtist + " " + bareTitle);
 
             const seen = {};
             const combined = [];
             for (let i = 0; i < queries.length; i++) {
+              const q = queries[i];
+              if (!q || !q.trim()) continue;
               const items = await searchTracks(queries[i]);
               for (let j = 0; j < items.length; j++) {
                 const key = items[j].id || items[j].uri || queries[i] + ":" + j;
