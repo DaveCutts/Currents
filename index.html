@@ -1321,6 +1321,13 @@
           if (!playlistPreviewAudio) {
             const a = new Audio();
             a.preload = "none";
+            a.volume = 1;
+            a.muted = false;
+            a.addEventListener("error", function () {
+              const m = a.error && a.error.message ? a.error.message : "Preview audio failed to load.";
+              setStatus(m, true);
+              clearPlaylistPreviewUi();
+            });
             a.addEventListener("ended", function () {
               clearPlaylistPreviewUi();
               a.removeAttribute("src");
@@ -1350,6 +1357,7 @@
             btn.disabled = true;
             btn.classList.add("playlist-preview-btn--disabled");
             btn.title = "No preview available";
+            btn.dataset.previewDisabledReason = "No preview available for this track.";
           } else if (canResolve) {
             btn.title = "Play 30-second preview (Spotify)";
           } else {
@@ -1357,7 +1365,10 @@
           }
 
           btn.addEventListener("click", async function () {
-            if (btn.disabled && !canResolve) return;
+            if (btn.disabled && !canResolve) {
+              setStatus(btn.dataset.previewDisabledReason || "No preview available for this track.", true);
+              return;
+            }
             let url = hasFixedUrl ? opts.previewUrl : item.dataset.previewUrl || "";
             if (!url && canResolve) {
               btn.classList.add("playlist-preview-btn--loading");
@@ -1374,6 +1385,8 @@
                 btn.disabled = true;
                 btn.classList.add("playlist-preview-btn--disabled");
                 btn.title = "No preview available";
+                btn.dataset.previewDisabledReason = "Spotify doesn't provide a preview clip for this track.";
+                setStatus(btn.dataset.previewDisabledReason, true);
                 return;
               }
             }
@@ -1394,8 +1407,12 @@
             audio.src = url;
             try {
               await audio.play();
+              setStatus("Playing 30-second preview.");
             } catch {
-              setStatus("Could not play preview.", true);
+              setStatus(
+                "Could not play preview. If you're on iOS/Safari, try unmuting the device and tapping play again.",
+                true
+              );
               stopPlaylistPreview();
             }
           });
