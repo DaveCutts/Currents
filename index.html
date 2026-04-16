@@ -643,16 +643,9 @@
               again.
             </p>
             <div id="spotify-not-connected">
-              <div class="field">
-                <label for="spotify-client-id">Spotify app Client ID</label>
-                <input
-                  id="spotify-client-id"
-                  type="text"
-                  autocomplete="off"
-                  spellcheck="false"
-                  placeholder="From the Spotify Developer Dashboard"
-                />
-              </div>
+              <p class="spotify-hint">
+                This build uses a built-in Spotify app Client ID.
+              </p>
               <p class="spotify-hint">
                 Create an app at
                 <a href="https://developer.spotify.com/dashboard" rel="noopener noreferrer">developer.spotify.com/dashboard</a>
@@ -812,6 +805,7 @@
         const UA = "Currents/1.0 +https://github.com/pages";
         const STORAGE_KEY = "discogs_token";
         const SPOTIFY_CLIENT_ID_KEY = "spotify_client_id";
+        const SPOTIFY_APP_CLIENT_ID = "dce03c8237ca4052bb566b25fa425e51";
         const SPOTIFY_ACCESS_KEY = "spotify_access_token";
         const SPOTIFY_REFRESH_KEY = "spotify_refresh_token";
         const SPOTIFY_EXPIRES_KEY = "spotify_token_expires_at";
@@ -838,7 +832,6 @@
           spotifyPanel: document.getElementById("spotify-panel"),
           spotifyNotConnected: document.getElementById("spotify-not-connected"),
           spotifyConnected: document.getElementById("spotify-connected"),
-          spotifyClientId: document.getElementById("spotify-client-id"),
           spotifyUserLine: document.getElementById("spotify-user-line"),
           btnSpotifyConnect: document.getElementById("btn-spotify-connect"),
           btnSpotifyDisconnect: document.getElementById("btn-spotify-disconnect"),
@@ -1003,8 +996,16 @@
         }
 
         function syncSpotifyClientIdField() {
-          const id = sessionStorage.getItem(SPOTIFY_CLIENT_ID_KEY) || "";
-          if (id && el.spotifyClientId) el.spotifyClientId.value = id;
+          const id = (SPOTIFY_APP_CLIENT_ID || "").trim();
+          if (id) {
+            sessionStorage.setItem(SPOTIFY_CLIENT_ID_KEY, id);
+          }
+        }
+
+        function getSpotifyClientId() {
+          const configured = (SPOTIFY_APP_CLIENT_ID || "").trim();
+          if (configured) return configured;
+          return (sessionStorage.getItem(SPOTIFY_CLIENT_ID_KEY) || "").trim();
         }
 
         function redirectUri() {
@@ -1083,7 +1084,7 @@
 
         async function spotifyRefreshAccessToken() {
           const refresh = sessionStorage.getItem(SPOTIFY_REFRESH_KEY);
-          const clientId = sessionStorage.getItem(SPOTIFY_CLIENT_ID_KEY);
+          const clientId = getSpotifyClientId();
           if (!refresh || !clientId) throw new Error("Spotify session expired. Connect again.");
           const body = new URLSearchParams({
             grant_type: "refresh_token",
@@ -1861,7 +1862,7 @@
           if (!code || !state) return false;
           const expected = sessionStorage.getItem(SPOTIFY_OAUTH_STATE);
           const verifier = sessionStorage.getItem(SPOTIFY_PKCE_VERIFIER);
-          const clientId = sessionStorage.getItem(SPOTIFY_CLIENT_ID_KEY);
+          const clientId = getSpotifyClientId();
           if (!expected || state !== expected || !verifier || !clientId) {
             return false;
           }
@@ -2355,9 +2356,12 @@
         });
 
         el.btnSpotifyConnect.addEventListener("click", async function () {
-          const clientId = el.spotifyClientId.value.trim();
+          const clientId = getSpotifyClientId();
           if (!clientId) {
-            setStatus("Enter your Spotify Client ID.", true);
+            setStatus(
+              "Set SPOTIFY_APP_CLIENT_ID in index.html to your Spotify app Client ID, then try again.",
+              true
+            );
             return;
           }
           if (!crypto || !crypto.subtle) {
