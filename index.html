@@ -1274,6 +1274,21 @@
           );
         }
 
+        function spotifyTitleTokenScore(candidateTitle, targetTitle) {
+          const candidate = normalizeSpotifySearchText(candidateTitle);
+          const target = normalizeSpotifySearchText(targetTitle);
+          if (!candidate || !target) return 0;
+          if (candidate === target) return 1;
+          const candTokens = candidate.split(" ").filter(Boolean);
+          const targetTokens = target.split(" ").filter(Boolean);
+          if (!candTokens.length || !targetTokens.length) return 0;
+          let hits = 0;
+          for (let i = 0; i < targetTokens.length; i++) {
+            if (candTokens.indexOf(targetTokens[i]) !== -1) hits++;
+          }
+          return hits / targetTokens.length;
+        }
+
         async function searchSpotifyTrackItems(accessToken, artist, title) {
           const primaryArtistRaw = String(artist || "")
             .split(",")[0]
@@ -1336,17 +1351,29 @@
               if (combined.length >= 10) break;
             }
 
+            if (!combined.length) {
+              // Last-resort fallback: search by artist only and rank by title similarity.
+              const artistOnlyItems = await searchTracks(primaryArtistRaw);
+              for (let i = 0; i < artistOnlyItems.length; i++) {
+                const key = artistOnlyItems[i].id || artistOnlyItems[i].uri || "artistOnly:" + i;
+                if (seen[key]) continue;
+                seen[key] = true;
+                combined.push(artistOnlyItems[i]);
+              }
+            }
             if (!combined.length) return [];
             const ranked = combined
               .map(function (it) {
                 const normalizedTrack = normalizeSpotifySearchText(it && it.name);
                 const normalizedTitleRaw = normalizeSpotifySearchText(trackTitleRaw);
                 const exactTitle = normalizedTrack && normalizedTrack === normalizedTitleRaw;
+                const tokenScore = spotifyTitleTokenScore(it && it.name, trackTitleRaw);
                 return {
                   item: it,
                   score:
                     (spotifyTrackLooksLikeMatch(it, primaryArtistRaw, trackTitleRaw) ? 3 : 0) +
                     (exactTitle ? 2 : 0) +
+                    tokenScore +
                     (it && it.popularity ? it.popularity / 1000 : 0),
                 };
               })
