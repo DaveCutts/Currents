@@ -1233,15 +1233,51 @@
           return items[idx].id || null;
         }
 
+        function normalizeSpotifySearchText(value) {
+          return String(value || "")
+            .toLowerCase()
+            .replace(/\([^)]*\)/g, " ")
+            .replace(/\[[^\]]*\]/g, " ")
+            .replace(/\b(feat|featuring|ft)\.?\b[^-;,/]*/g, " ")
+            .replace(/\b(remaster(ed)?|mono|stereo|version|edit|live|mix)\b/g, " ")
+            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+        }
+
+        function spotifyTrackLooksLikeMatch(track, artist, title) {
+          const normalizedTitle = normalizeSpotifySearchText(title);
+          const normalizedArtist = normalizeSpotifySearchText(artist).split(" ")[0] || "";
+          const trackName = normalizeSpotifySearchText(track && track.name);
+          const artistNames = normalizeSpotifySearchText(
+            ((track && track.artists) || [])
+              .map(function (a) {
+                return a && a.name ? a.name : "";
+              })
+              .join(" ")
+          );
+          if (!trackName) return false;
+          const titleLooksClose =
+            trackName === normalizedTitle ||
+            trackName.indexOf(normalizedTitle) !== -1 ||
+            normalizedTitle.indexOf(trackName) !== -1;
+          if (!titleLooksClose) return false;
+          return !normalizedArtist || artistNames.indexOf(normalizedArtist) !== -1;
+        }
+
         async function searchSpotifyTrackItems(accessToken, artist, title) {
-          const primaryArtist = String(artist || "")
+          const primaryArtistRaw = String(artist || "")
             .split(",")[0]
             .trim()
             .replace(/"/g, " ");
-          const trackTitle = String(title || "")
+          const trackTitleRaw = String(title || "")
             .trim()
             .replace(/"/g, " ");
-          if (!primaryArtist || !trackTitle) return [];
+          if (!primaryArtistRaw || !trackTitleRaw) return [];
+          const primaryArtist = normalizeSpotifySearchText(primaryArtistRaw) || primaryArtistRaw;
+          const trackTitle = normalizeSpotifySearchText(trackTitleRaw) || trackTitleRaw;
+          const shortTitle = trackTitle.split("-")[0].trim();
+          const bareTitle = trackTitle.split(" ").slice(0, 4).join(" ").trim();
 
           async function searchTracks(q) {
             const data = await spotifyApiGet(
@@ -1253,11 +1289,42 @@
           }
 
           try {
-            let items = await searchTracks("artist:" + primaryArtist + " track:" + trackTitle);
-            if (!items.length) {
-              items = await searchTracks(primaryArtist + " " + trackTitle);
+            const queries = [
+              'artist:"' + primaryArtist + '" track:"' + trackTitle + '"',
+              primaryArtist + " " + trackTitle,
+              'track:"' + trackTitle + '"',
+            ];
+            if (shortTitle && shortTitle !== trackTitle) queries.push(primaryArtist + " " + shortTitle);
+            if (bareTitle && bareTitle !== trackTitle) queries.push(primaryArtist + " " + bareTitle);
+
+            const seen = {};
+            const combined = [];
+            for (let i = 0; i < queries.length; i++) {
+              const items = await searchTracks(queries[i]);
+              for (let j = 0; j < items.length; j++) {
+                const key = items[j].id || items[j].uri || queries[i] + ":" + j;
+                if (seen[key]) continue;
+                seen[key] = true;
+                combined.push(items[j]);
+              }
+              if (combined.length >= 10) break;
             }
-            return items;
+
+            if (!combined.length) return [];
+            const ranked = combined
+              .map(function (it) {
+                return {
+                  item: it,
+                  score: spotifyTrackLooksLikeMatch(it, primaryArtistRaw, trackTitleRaw) ? 2 : 1,
+                };
+              })
+              .sort(function (a, b) {
+                return b.score - a.score;
+              })
+              .map(function (entry) {
+                return entry.item;
+              });
+            return ranked;
           } catch {
             return [];
           }
