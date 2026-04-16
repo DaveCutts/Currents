@@ -66,13 +66,169 @@
         z-index: 1;
         max-width: 42rem;
         margin: 0 auto;
-        padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) 4rem;
+        padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.5rem) 4rem;
       }
-      h1 {
-        margin: 0 0 2rem;
-        font-size: clamp(2rem, 6vw, 3.5rem);
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .app-title {
+        margin: 0;
+        font-size: clamp(1.35rem, 4vw, 2rem);
         font-weight: 600;
         letter-spacing: -0.02em;
+      }
+      .btn-gear {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: var(--surface);
+        color: var(--fg);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+      .btn-gear:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .btn-gear:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .btn-gear svg {
+        width: 1.35rem;
+        height: 1.35rem;
+      }
+      .btn-gear:disabled {
+        opacity: 0.42;
+        box-shadow: none;
+        border-color: var(--border);
+        color: var(--muted);
+        cursor: not-allowed;
+      }
+      .collection-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+      }
+      .collection-header-row .main-section-title {
+        margin: 0;
+      }
+      .collection-title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-width: 0;
+      }
+      .collection-caret-btn {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .collection-caret-btn:hover:not(:disabled) {
+        background: var(--border);
+        color: var(--fg);
+      }
+      .collection-caret-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .collection-caret-btn .collection-caret-svg {
+        width: 1.15rem;
+        height: 1.15rem;
+        display: block;
+        transition: transform 0.18s ease;
+      }
+      .collection-caret-btn[aria-expanded="false"] .collection-caret-svg {
+        transform: rotate(-90deg);
+      }
+      .collection-settings-btn {
+        flex-shrink: 0;
+        font-size: 0.8125rem;
+        padding: 0.35rem 0.65rem;
+      }
+      .collection-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .discogs-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      .discogs-modal.hidden {
+        display: none !important;
+      }
+      .discogs-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.48);
+      }
+      .discogs-modal-panel {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 26rem;
+        max-height: min(90vh, 40rem);
+        overflow-y: auto;
+        margin: 0;
+      }
+      .discogs-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.65rem;
+      }
+      .discogs-modal-header h2 {
+        margin: 0;
+        font-size: 1.125rem;
+      }
+      .btn-modal-close {
+        padding: 0.2rem 0.45rem;
+        line-height: 1;
+        font-size: 1.35rem;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .btn-modal-close:hover {
+        background: var(--border);
+        color: var(--fg);
+      }
+      .main-section-title {
+        margin: 0 0 0.5rem;
+        font-size: 1.05rem;
+        font-weight: 600;
       }
       h2 {
         margin: 0 0 0.75rem;
@@ -158,9 +314,24 @@
         opacity: 0.55;
         cursor: not-allowed;
       }
+      .btn-with-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+      .btn-with-icon .btn-ic {
+        display: inline-flex;
+        line-height: 0;
+        flex-shrink: 0;
+      }
+      .btn-with-icon .btn-ic svg {
+        width: 1em;
+        height: 1em;
+      }
       .status {
         font-size: 0.875rem;
-        margin-top: 0.75rem;
+        margin-top: 0.5rem;
         color: var(--muted);
       }
       .status.error {
@@ -226,6 +397,29 @@
         font-size: 1rem;
         font-weight: 600;
       }
+      .playlist-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.35rem;
+      }
+      .playlist-header-row .playlist-heading {
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+      }
+      .playlist-header-actions {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.35rem;
+      }
+      .playlist-header-actions .btn-with-icon {
+        white-space: nowrap;
+      }
       .playlist-list {
         margin: 0;
         padding-left: 1.35rem;
@@ -250,7 +444,8 @@
         color: var(--muted);
         margin-top: 0.15rem;
       }
-      .playlist-list li.playlist-row-spotify {
+      .playlist-list li.playlist-row-spotify,
+      .playlist-list li.playlist-row-discogs {
         display: flex;
         align-items: center;
         gap: 0.65rem;
@@ -274,6 +469,57 @@
         min-width: 0;
         flex: 1;
       }
+      .playlist-preview-btn {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        margin: 0;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: var(--card);
+        color: var(--fg);
+        cursor: pointer;
+      }
+      .playlist-preview-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .playlist-preview-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .playlist-preview-btn:disabled,
+      .playlist-preview-btn.playlist-preview-btn--disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .playlist-preview-btn.playlist-preview-btn--loading {
+        opacity: 0.55;
+        pointer-events: none;
+      }
+      .playlist-preview-btn .playlist-preview-ic {
+        display: flex;
+        width: 0.95rem;
+        height: 0.95rem;
+      }
+      .playlist-preview-btn .playlist-preview-ic svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .playlist-preview-btn .playlist-preview-ic-pause {
+        display: none;
+      }
+      .playlist-preview-btn.is-playing .playlist-preview-ic-play {
+        display: none;
+      }
+      .playlist-preview-btn.is-playing .playlist-preview-ic-pause {
+        display: flex;
+      }
       #spotify-panel {
         margin-top: 1.15rem;
         padding-top: 1.1rem;
@@ -289,17 +535,49 @@
         color: var(--muted);
         margin: 0 0 0.75rem;
       }
+      .spotify-redirect-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin: 0 0 0.85rem;
+      }
+      .spotify-redirect-uri-code {
+        flex: 1;
+        min-width: 12rem;
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.35;
+        word-break: break-all;
+        padding: 0.45rem 0.55rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--fg);
+      }
+      .spotify-redirect-copy {
+        flex-shrink: 0;
+        font-size: 0.8125rem;
+        padding: 0.35rem 0.65rem;
+      }
     </style>
   </head>
   <body>
     <div class="site-bg" role="presentation" aria-hidden="true"></div>
-    <div class="page">
-      <header>
-        <h1>Currents</h1>
-      </header>
 
-      <section class="card" aria-labelledby="discogs-heading">
-        <h2 id="discogs-heading">Discogs collection</h2>
+    <div
+      id="discogs-modal"
+      class="discogs-modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="discogs-modal-title"
+    >
+      <div class="discogs-modal-backdrop" id="discogs-modal-backdrop" tabindex="-1" aria-hidden="true"></div>
+      <div class="discogs-modal-panel card">
+        <div class="discogs-modal-header">
+          <h2 id="discogs-modal-title">Discogs</h2>
+          <button type="button" class="btn-modal-close" id="btn-discogs-modal-close" aria-label="Close">×</button>
+        </div>
         <p>
           Connect with a
           <a href="https://www.discogs.com/settings/developers" rel="noopener noreferrer">personal token</a>
@@ -320,16 +598,39 @@
             />
           </div>
           <div class="row">
-            <button type="button" class="primary" id="btn-connect">Connect</button>
+            <button type="button" class="primary btn-with-icon" id="btn-connect">
+              <span class="btn-ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+                </svg>
+              </span>
+              <span class="btn-txt">Connect</span>
+            </button>
           </div>
         </div>
 
         <div id="connected-panel" class="hidden">
           <p id="user-line" style="margin-bottom: 1rem; color: var(--fg)"></p>
           <div class="row">
-            <button type="button" class="primary" id="btn-load">Load collection</button>
-            <button type="button" class="secondary" id="btn-playlist">Generate playlist</button>
-            <button type="button" class="secondary" id="btn-disconnect">Sign out</button>
+            <button type="button" class="primary btn-with-icon" id="btn-load">
+              <span class="btn-ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 4v6h-6" />
+                  <path d="M20.49 15A9 9 0 0 1 5.64 5.64L1 10" />
+                  <path d="M1 14v6h6" />
+                  <path d="M3.51 9a9 9 0 0 0 14.85 3.36L23 14" />
+                </svg>
+              </span>
+              <span class="btn-txt">Refresh collection</span>
+            </button>
+            <button type="button" class="secondary btn-with-icon" id="btn-disconnect">
+              <span class="btn-ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+                </svg>
+              </span>
+              <span class="btn-txt">Sign out</span>
+            </button>
           </div>
 
           <div id="spotify-panel" class="hidden">
@@ -355,34 +656,152 @@
               <p class="spotify-hint">
                 Create an app at
                 <a href="https://developer.spotify.com/dashboard" rel="noopener noreferrer">developer.spotify.com/dashboard</a>
-                and add this page’s URL (including path) under Redirect URIs — it must match exactly what you see in the address bar here.
+                . Under <strong>Redirect URIs</strong>, add the value below <strong>exactly</strong> (same https/http, path, and trailing slash). It must match
+                what this site sends to Spotify — copy from here, not from memory.
               </p>
-              <button type="button" class="secondary" id="btn-spotify-connect">Connect Spotify</button>
+              <div class="spotify-redirect-row">
+                <code id="spotify-redirect-uri-display" class="spotify-redirect-uri-code"></code>
+                <button type="button" class="secondary spotify-redirect-copy" id="btn-copy-spotify-redirect">
+                  Copy URI
+                </button>
+              </div>
+              <button type="button" class="secondary btn-with-icon" id="btn-spotify-connect">
+                <span class="btn-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18V5l12-2v13" />
+                    <circle cx="6" cy="18" r="3" />
+                    <circle cx="18" cy="16" r="3" />
+                  </svg>
+                </span>
+                <span class="btn-txt">Connect Spotify</span>
+              </button>
             </div>
             <div id="spotify-connected" class="hidden">
               <p id="spotify-user-line" style="margin: 0 0 0.85rem; color: var(--fg); font-size: 0.9375rem"></p>
               <div class="row">
-                <button type="button" class="secondary" id="btn-spotify-recs">Spotify recommendations playlist</button>
-                <button type="button" class="danger" id="btn-spotify-disconnect">Disconnect Spotify</button>
+                <button type="button" class="secondary btn-with-icon" id="btn-spotify-recs">
+                  <span class="btn-ic" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 18V5l12-2v13" />
+                      <circle cx="6" cy="18" r="3" />
+                      <circle cx="18" cy="16" r="3" />
+                    </svg>
+                  </span>
+                  <span class="btn-txt">Spotify recommendations playlist</span>
+                </button>
+                <button type="button" class="danger btn-with-icon" id="btn-spotify-disconnect">
+                  <span class="btn-ic" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </span>
+                  <span class="btn-txt">Disconnect Spotify</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
+    <div class="page">
+      <header class="app-header">
+        <h1 class="app-title">Currents</h1>
+        <button
+          type="button"
+          id="btn-discogs-menu"
+          class="btn-gear"
+          aria-label="Open Discogs and Spotify settings"
+          aria-expanded="false"
+          aria-controls="discogs-modal"
+          title="Discogs settings"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+            />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
+      </header>
+
+      <section class="card" aria-labelledby="main-collection-heading">
+        <div class="collection-header-row">
+          <div class="collection-title-group">
+            <button
+              type="button"
+              id="btn-toggle-collection"
+              class="collection-caret-btn hidden"
+              aria-expanded="false"
+              aria-controls="collection-wrap"
+              disabled
+              aria-label="Expand or collapse collection list"
+              title="Show or hide collection"
+            >
+              <svg
+                class="collection-caret-svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                stroke="currentColor"
+                stroke-width="2.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            <h2 class="main-section-title" id="main-collection-heading">Collection</h2>
+          </div>
+          <div id="collection-header-actions" class="collection-header-actions hidden">
+            <button type="button" class="secondary collection-settings-btn btn-with-icon" id="btn-playlist"></button>
+          </div>
+        </div>
+        <p id="discogs-hint-main" class="collection-meta" style="margin-bottom: 0.75rem">
+          Use the settings gear in the header to connect Discogs or manage your session.
+        </p>
         <div id="status-line" class="status" role="status" aria-live="polite"></div>
 
-        <div id="collection-wrap" class="hidden" style="margin-top: 1.25rem">
+        <div id="collection-wrap" class="hidden" style="margin-top: 1rem">
           <p class="collection-meta" id="collection-meta"></p>
           <ul class="collection-list" id="collection-list"></ul>
         </div>
 
         <div id="playlist-wrap" class="hidden" style="margin-top: 1.25rem">
-          <h3 class="playlist-heading" id="playlist-heading">Suggested playlist</h3>
-          <p class="collection-meta" id="playlist-meta"></p>
-          <div class="row" style="margin-bottom: 0.75rem">
-            <button type="button" class="secondary" id="btn-copy-playlist">Copy as text</button>
-            <button type="button" class="primary hidden" id="btn-save-spotify-playlist">Save as Spotify playlist</button>
+          <div class="playlist-header-row">
+            <h3 class="playlist-heading" id="playlist-heading">Suggested playlist</h3>
+            <div class="playlist-header-actions">
+              <button type="button" class="primary btn-with-icon hidden" id="btn-add-to-spotify">
+                <span class="btn-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 8v8M8 12h8" />
+                  </svg>
+                </span>
+                <span class="btn-txt">Add to Spotify</span>
+              </button>
+              <button type="button" class="primary btn-with-icon hidden" id="btn-save-spotify-playlist">
+                <span class="btn-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <path d="M17 21v-8H7v8M7 3v5h8" />
+                  </svg>
+                </span>
+                <span class="btn-txt">Save as Spotify playlist</span>
+              </button>
+            </div>
           </div>
+          <p class="collection-meta" id="playlist-meta"></p>
           <ol class="playlist-list" id="playlist-list"></ol>
         </div>
       </section>
@@ -407,7 +826,6 @@
           btnLoad: document.getElementById("btn-load"),
           btnPlaylist: document.getElementById("btn-playlist"),
           btnDisconnect: document.getElementById("btn-disconnect"),
-          btnCopyPlaylist: document.getElementById("btn-copy-playlist"),
           userLine: document.getElementById("user-line"),
           statusLine: document.getElementById("status-line"),
           collectionWrap: document.getElementById("collection-wrap"),
@@ -425,8 +843,35 @@
           btnSpotifyConnect: document.getElementById("btn-spotify-connect"),
           btnSpotifyDisconnect: document.getElementById("btn-spotify-disconnect"),
           btnSpotifyRecs: document.getElementById("btn-spotify-recs"),
+          btnAddToSpotify: document.getElementById("btn-add-to-spotify"),
           btnSaveSpotifyPlaylist: document.getElementById("btn-save-spotify-playlist"),
+          discogsModal: document.getElementById("discogs-modal"),
+          discogsModalBackdrop: document.getElementById("discogs-modal-backdrop"),
+          btnDiscogsMenu: document.getElementById("btn-discogs-menu"),
+          btnDiscogsModalClose: document.getElementById("btn-discogs-modal-close"),
+          discogsHintMain: document.getElementById("discogs-hint-main"),
+          collectionHeaderActions: document.getElementById("collection-header-actions"),
+          btnToggleCollection: document.getElementById("btn-toggle-collection"),
+          spotifyRedirectUriDisplay: document.getElementById("spotify-redirect-uri-display"),
+          btnCopySpotifyRedirect: document.getElementById("btn-copy-spotify-redirect"),
         };
+
+        const ICON_LIST =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>';
+        const ICON_REFRESH =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.48L21 10"/><path d="M23 20v-6h-6"/><path d="M20.49 15a9 9 0 0 1-14.85 3.48L3 14"/></svg>';
+
+        function setPlaylistButtonMode(mode) {
+          const isRefresh = mode === "refresh";
+          el.btnPlaylist.innerHTML =
+            '<span class="btn-ic" aria-hidden="true">' +
+            (isRefresh ? ICON_REFRESH : ICON_LIST) +
+            '</span><span class="btn-txt">' +
+            (isRefresh ? "Refresh playlist" : "Generate playlist") +
+            "</span>";
+        }
+
+        setPlaylistButtonMode("generate");
 
         const PLAYLIST_TRACK_COUNT = 12;
         const SPOTIFY_SEED_TRACKS = 5;
@@ -434,8 +879,8 @@
 
         let username = null;
         let collectionCache = null;
-        let playlistCopyText = "";
         let spotifyCurrentPlaylistUris = null;
+        let discogsPlaylistSpotifySource = null;
 
         function authHeaders(token) {
           return {
@@ -471,12 +916,52 @@
           el.statusLine.classList.toggle("error", !!isError);
         }
 
+        function setCollectionSectionExpanded(expanded) {
+          el.btnToggleCollection.setAttribute("aria-expanded", expanded ? "true" : "false");
+          el.collectionWrap.classList.toggle("hidden", !expanded);
+        }
+
+        function hideCollectionForPlaylistFocus() {
+          setCollectionSectionExpanded(false);
+        }
+
+        function isDiscogsModalOpen() {
+          return !el.discogsModal.classList.contains("hidden");
+        }
+
+        function openDiscogsModal() {
+          updateSpotifyRedirectUriDisplay();
+          el.discogsModal.classList.remove("hidden");
+          el.btnDiscogsMenu.setAttribute("aria-expanded", "true");
+          document.body.style.overflow = "hidden";
+          requestAnimationFrame(function () {
+            if (!el.connectedPanel.classList.contains("hidden")) {
+              el.btnLoad.focus();
+            } else {
+              el.tokenInput.focus();
+            }
+          });
+        }
+
+        function closeDiscogsModal() {
+          el.discogsModal.classList.add("hidden");
+          el.btnDiscogsMenu.setAttribute("aria-expanded", "false");
+          document.body.style.overflow = "";
+          el.btnDiscogsMenu.focus();
+        }
+
         function showConnected(user) {
           username = user;
           el.loginPanel.classList.add("hidden");
           el.connectedPanel.classList.remove("hidden");
           el.userLine.textContent = "Signed in as " + user + ".";
           el.spotifyPanel.classList.remove("hidden");
+          el.discogsHintMain.classList.add("hidden");
+          el.btnDiscogsMenu.setAttribute("aria-label", "Open Discogs and Spotify settings");
+          el.btnDiscogsMenu.setAttribute("title", "Discogs settings");
+          el.collectionHeaderActions.classList.remove("hidden");
+          el.btnToggleCollection.classList.remove("hidden");
+          el.btnToggleCollection.disabled = false;
           syncSpotifyClientIdField();
           refreshSpotifyConnectionUI();
           void populateSpotifyUserLine();
@@ -491,22 +976,30 @@
         }
 
         function showLogin() {
+          stopPlaylistPreview();
           username = null;
           collectionCache = null;
-          playlistCopyText = "";
           spotifyCurrentPlaylistUris = null;
-          updateSpotifySavePlaylistButton();
+          discogsPlaylistSpotifySource = null;
+          updateSpotifyPlaylistActionButtons();
           clearSpotifySession();
           el.loginPanel.classList.remove("hidden");
           el.connectedPanel.classList.add("hidden");
           el.spotifyPanel.classList.add("hidden");
           el.spotifyNotConnected.classList.remove("hidden");
           el.spotifyConnected.classList.add("hidden");
-          el.collectionWrap.classList.add("hidden");
+          setCollectionSectionExpanded(false);
           el.collectionList.innerHTML = "";
           el.playlistWrap.classList.add("hidden");
           el.playlistList.innerHTML = "";
           el.tokenInput.value = "";
+          el.discogsHintMain.classList.remove("hidden");
+          el.btnToggleCollection.classList.add("hidden");
+          el.btnToggleCollection.disabled = true;
+          el.btnDiscogsMenu.setAttribute("aria-label", "Open Discogs and Spotify settings");
+          el.btnDiscogsMenu.setAttribute("title", "Discogs settings");
+          el.collectionHeaderActions.classList.add("hidden");
+          setPlaylistButtonMode("generate");
         }
 
         function syncSpotifyClientIdField() {
@@ -518,7 +1011,21 @@
           const u = new URL(window.location.href);
           u.hash = "";
           u.search = "";
+          var path = u.pathname;
+          if (path.toLowerCase().endsWith("/index.html")) {
+            path = path.slice(0, -"/index.html".length);
+            if (path !== "/" && !path.endsWith("/")) {
+              path += "/";
+            }
+          }
+          u.pathname = path || "/";
           return u.toString();
+        }
+
+        function updateSpotifyRedirectUriDisplay() {
+          if (el.spotifyRedirectUriDisplay) {
+            el.spotifyRedirectUriDisplay.textContent = redirectUri();
+          }
         }
 
         function randomVerifierString(len) {
@@ -678,9 +1185,15 @@
           return data;
         }
 
-        function updateSpotifySavePlaylistButton() {
-          const show = !!(spotifyCurrentPlaylistUris && spotifyCurrentPlaylistUris.length);
-          el.btnSaveSpotifyPlaylist.classList.toggle("hidden", !show);
+        function updateSpotifyPlaylistActionButtons() {
+          const showSave = !!(spotifyCurrentPlaylistUris && spotifyCurrentPlaylistUris.length);
+          el.btnSaveSpotifyPlaylist.classList.toggle("hidden", !showSave);
+          const showAdd = !!(
+            discogsPlaylistSpotifySource &&
+            discogsPlaylistSpotifySource.tracks &&
+            discogsPlaylistSpotifySource.tracks.length
+          );
+          el.btnAddToSpotify.classList.toggle("hidden", !showAdd);
         }
 
         async function fetchSpotifyMe(accessToken) {
@@ -720,6 +1233,176 @@
           return items[idx].id || null;
         }
 
+        async function searchSpotifyTrackItems(accessToken, artist, title) {
+          const primaryArtist = String(artist || "")
+            .split(",")[0]
+            .trim()
+            .replace(/"/g, " ");
+          const trackTitle = String(title || "")
+            .trim()
+            .replace(/"/g, " ");
+          if (!primaryArtist || !trackTitle) return [];
+
+          async function searchTracks(q) {
+            const data = await spotifyApiGet(
+              "/v1/search?" +
+                new URLSearchParams({ q: q, type: "track", limit: "10" }).toString(),
+              accessToken
+            );
+            return (data.tracks && data.tracks.items) || [];
+          }
+
+          try {
+            let items = await searchTracks("artist:" + primaryArtist + " track:" + trackTitle);
+            if (!items.length) {
+              items = await searchTracks(primaryArtist + " " + trackTitle);
+            }
+            return items;
+          } catch {
+            return [];
+          }
+        }
+
+        async function tryResolveSpotifyTrackUri(accessToken, artist, title) {
+          const items = await searchSpotifyTrackItems(accessToken, artist, title);
+          for (let i = 0; i < items.length; i++) {
+            const it = items[i];
+            if (it.uri) return it.uri;
+            if (it.id) return "spotify:track:" + it.id;
+          }
+          return null;
+        }
+
+        async function tryGetSpotifyTrackPreviewUrl(accessToken, artist, title) {
+          const items = await searchSpotifyTrackItems(accessToken, artist, title);
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].preview_url) return items[i].preview_url;
+          }
+          const first = items[0];
+          if (first && first.id) {
+            try {
+              const full = await spotifyApiGet(
+                "/v1/tracks/" + encodeURIComponent(first.id),
+                accessToken
+              );
+              if (full && full.preview_url) return full.preview_url;
+            } catch {
+              /* ignore */
+            }
+          }
+          return null;
+        }
+
+        let playlistPreviewAudio = null;
+        let playlistPreviewActiveButton = null;
+
+        function clearPlaylistPreviewUi() {
+          if (playlistPreviewActiveButton) {
+            playlistPreviewActiveButton.classList.remove("is-playing", "playlist-preview-btn--loading");
+            playlistPreviewActiveButton.setAttribute("aria-pressed", "false");
+            playlistPreviewActiveButton = null;
+          }
+        }
+
+        function stopPlaylistPreview() {
+          if (playlistPreviewAudio) {
+            playlistPreviewAudio.pause();
+            playlistPreviewAudio.removeAttribute("src");
+            try {
+              playlistPreviewAudio.load();
+            } catch (_) {
+              /* ignore */
+            }
+          }
+          clearPlaylistPreviewUi();
+        }
+
+        function ensurePlaylistPreviewAudio() {
+          if (!playlistPreviewAudio) {
+            const a = new Audio();
+            a.preload = "none";
+            a.addEventListener("ended", function () {
+              clearPlaylistPreviewUi();
+              a.removeAttribute("src");
+            });
+            playlistPreviewAudio = a;
+          }
+          return playlistPreviewAudio;
+        }
+
+        function appendPlaylistPreviewControl(item, insertBeforeNode, opts) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "playlist-preview-btn";
+          btn.setAttribute("aria-label", "Play 30-second preview");
+          btn.setAttribute("aria-pressed", "false");
+          btn.innerHTML =
+            '<span class="playlist-preview-ic playlist-preview-ic-play" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>' +
+            '<span class="playlist-preview-ic playlist-preview-ic-pause" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg></span>';
+
+          const hasFixedUrl = typeof opts.previewUrl === "string" && opts.previewUrl.length > 0;
+          const canResolve = typeof opts.resolvePreview === "function";
+          const noPreviewAvailable = !hasFixedUrl && !canResolve;
+
+          if (noPreviewAvailable) {
+            btn.disabled = true;
+            btn.classList.add("playlist-preview-btn--disabled");
+            btn.title = "No preview available";
+          } else if (canResolve) {
+            btn.title = "Play 30-second preview (Spotify)";
+          } else {
+            btn.title = "Play 30-second preview";
+          }
+
+          btn.addEventListener("click", async function () {
+            if (btn.disabled && !canResolve) return;
+            let url = hasFixedUrl ? opts.previewUrl : item.dataset.previewUrl || "";
+            if (!url && canResolve) {
+              btn.classList.add("playlist-preview-btn--loading");
+              try {
+                url = (await opts.resolvePreview()) || "";
+              } catch (err) {
+                url = "";
+                setStatus((err && err.message) || "Could not load preview.", true);
+              }
+              btn.classList.remove("playlist-preview-btn--loading");
+              if (url) {
+                item.dataset.previewUrl = url;
+              } else {
+                btn.disabled = true;
+                btn.classList.add("playlist-preview-btn--disabled");
+                btn.title = "No preview available";
+                return;
+              }
+            }
+            if (!url) return;
+
+            const audio = ensurePlaylistPreviewAudio();
+            const playingThis =
+              playlistPreviewActiveButton === btn && !audio.paused && (audio.src || audio.currentSrc);
+            if (playingThis) {
+              stopPlaylistPreview();
+              return;
+            }
+
+            stopPlaylistPreview();
+            playlistPreviewActiveButton = btn;
+            btn.classList.add("is-playing");
+            btn.setAttribute("aria-pressed", "true");
+            audio.src = url;
+            try {
+              await audio.play();
+            } catch {
+              setStatus("Could not play preview.", true);
+              stopPlaylistPreview();
+            }
+          });
+
+          item.insertBefore(btn, insertBeforeNode);
+        }
+
         async function collectSpotifySeedTrackIds(accessToken, entries) {
           const ids = [];
           const pool = entries.slice();
@@ -754,15 +1437,17 @@
         }
 
         async function generateSpotifyRecommendationsPlaylist(discogsToken) {
+          stopPlaylistPreview();
           el.playlistWrap.classList.add("hidden");
           el.playlistList.innerHTML = "";
-          playlistCopyText = "";
           spotifyCurrentPlaylistUris = null;
-          updateSpotifySavePlaylistButton();
+          discogsPlaylistSpotifySource = null;
+          updateSpotifyPlaylistActionButtons();
           el.btnSpotifyRecs.disabled = true;
           el.btnLoad.disabled = true;
           el.btnPlaylist.disabled = true;
           el.btnSaveSpotifyPlaylist.disabled = true;
+          el.btnAddToSpotify.disabled = true;
 
           try {
             const access = await getSpotifyAccessToken();
@@ -809,8 +1494,7 @@
               seedIds.length +
               " seed" +
               (seedIds.length === 1 ? "" : "s") +
-              " from your collection). Open any row in Spotify, or save as a private playlist in your library.";
-            const lines = [];
+              " from your collection). Open any row in Spotify, or save as a private playlist in your library. The play button next to each row starts a 30-second preview when Spotify provides one.";
             const uris = [];
             for (let t = 0; t < tracks.length; t++) {
               const tr = tracks[t];
@@ -821,7 +1505,6 @@
                 .join(", ");
               const title = tr.name || "Track";
               const line = artists + " — " + title;
-              lines.push(String(t + 1) + ". " + line);
               const item = document.createElement("li");
               item.className = "playlist-row-spotify";
               const thumbUrl = spotifySmallestImage(tr.album && tr.album.images);
@@ -854,6 +1537,8 @@
               textWrap.appendChild(from);
               item.appendChild(wrap);
               item.appendChild(textWrap);
+              const previewUrl = (tr.preview_url || "").trim() || null;
+              appendPlaylistPreviewControl(item, textWrap, { previewUrl: previewUrl });
               el.playlistList.appendChild(item);
               if (tr.uri) {
                 uris.push(tr.uri);
@@ -861,58 +1546,65 @@
                 uris.push("spotify:track:" + tr.id);
               }
             }
-            playlistCopyText = lines.join("\n");
             spotifyCurrentPlaylistUris = uris.length ? uris : null;
-            updateSpotifySavePlaylistButton();
+            updateSpotifyPlaylistActionButtons();
             el.playlistWrap.classList.remove("hidden");
+            hideCollectionForPlaylistFocus();
             setStatus("Spotify recommendations ready.");
           } catch (err) {
             spotifyCurrentPlaylistUris = null;
-            updateSpotifySavePlaylistButton();
+            updateSpotifyPlaylistActionButtons();
             setStatus(err.message || "Spotify playlist failed.", true);
           } finally {
             el.btnSpotifyRecs.disabled = false;
             el.btnLoad.disabled = false;
             el.btnPlaylist.disabled = false;
             el.btnSaveSpotifyPlaylist.disabled = false;
+            el.btnAddToSpotify.disabled = false;
           }
+        }
+
+        async function createSpotifyPlaylistWithTracks(accessToken, uris, meta) {
+          const me = await fetchSpotifyMe(accessToken);
+          const userId = me.id;
+          const created = await spotifyApiPost(
+            "/v1/users/" + encodeURIComponent(userId) + "/playlists",
+            accessToken,
+            {
+              name: meta.name,
+              description: meta.description || "",
+              public: false,
+            }
+          );
+          const pid = created.id;
+          const chunk = 100;
+          const label = meta.progressLabel || "Saving to Spotify… ";
+          for (let i = 0; i < uris.length; i += chunk) {
+            setStatus(label + Math.min(i + chunk, uris.length) + " / " + uris.length);
+            const slice = uris.slice(i, i + chunk);
+            await spotifyApiPost("/v1/playlists/" + encodeURIComponent(pid) + "/tracks", accessToken, {
+              uris: slice,
+            });
+          }
+          return created;
         }
 
         async function saveRecommendationsToSpotifyPlaylist() {
           if (!spotifyCurrentPlaylistUris || !spotifyCurrentPlaylistUris.length) return;
           el.btnSaveSpotifyPlaylist.disabled = true;
+          el.btnAddToSpotify.disabled = true;
           el.btnSpotifyRecs.disabled = true;
           el.btnLoad.disabled = true;
           el.btnPlaylist.disabled = true;
           try {
             const access = await getSpotifyAccessToken();
-            const me = await fetchSpotifyMe(access);
-            const userId = me.id;
             const date = new Date().toISOString().slice(0, 10);
-            const created = await spotifyApiPost(
-              "/v1/users/" + encodeURIComponent(userId) + "/playlists",
-              access,
-              {
-                name: "Currents recommendations — " + date,
-                description:
-                  "Generated by Currents using Spotify recommendations from your Discogs collection.",
-                public: false,
-              }
-            );
-            const pid = created.id;
-            const chunk = 100;
-            for (let i = 0; i < spotifyCurrentPlaylistUris.length; i += chunk) {
-              setStatus(
-                "Saving to Spotify… " +
-                  Math.min(i + chunk, spotifyCurrentPlaylistUris.length) +
-                  " / " +
-                  spotifyCurrentPlaylistUris.length
-              );
-              const slice = spotifyCurrentPlaylistUris.slice(i, i + chunk);
-              await spotifyApiPost("/v1/playlists/" + encodeURIComponent(pid) + "/tracks", access, {
-                uris: slice,
-              });
-            }
+            const created = await createSpotifyPlaylistWithTracks(access, spotifyCurrentPlaylistUris, {
+              name: "Currents recommendations — " + date,
+              description:
+                "Generated by Currents using Spotify recommendations from your Discogs collection.",
+              progressLabel: "Saving to Spotify… ",
+            });
             const web = created.external_urls && created.external_urls.spotify;
             setStatus(web ? "Playlist saved: " + web : "Playlist saved to your Spotify library.");
           } catch (e) {
@@ -926,6 +1618,74 @@
               setStatus(m || "Could not save playlist.", true);
             }
           } finally {
+            el.btnSaveSpotifyPlaylist.disabled = false;
+            el.btnAddToSpotify.disabled = false;
+            el.btnSpotifyRecs.disabled = false;
+            el.btnLoad.disabled = false;
+            el.btnPlaylist.disabled = false;
+          }
+        }
+
+        async function addDiscogsSuggestedToSpotify() {
+          const src = discogsPlaylistSpotifySource;
+          if (!src || !src.tracks || !src.tracks.length) return;
+          if (!sessionStorage.getItem(SPOTIFY_REFRESH_KEY)) {
+            setStatus("Connect Spotify first.", true);
+            return;
+          }
+          el.btnAddToSpotify.disabled = true;
+          el.btnSaveSpotifyPlaylist.disabled = true;
+          el.btnSpotifyRecs.disabled = true;
+          el.btnLoad.disabled = true;
+          el.btnPlaylist.disabled = true;
+          try {
+            const access = await getSpotifyAccessToken();
+            const uris = [];
+            const seen = {};
+            for (let i = 0; i < src.tracks.length; i++) {
+              setStatus("Finding tracks on Spotify… " + (i + 1) + " / " + src.tracks.length);
+              const uri = await tryResolveSpotifyTrackUri(
+                access,
+                src.tracks[i].artist,
+                src.tracks[i].title
+              );
+              if (uri && !seen[uri]) {
+                seen[uri] = true;
+                uris.push(uri);
+              }
+              await new Promise(function (r) {
+                setTimeout(r, 100);
+              });
+            }
+            if (!uris.length) {
+              throw new Error(
+                "Could not match any of these tracks on Spotify. Try releases that exist on Spotify, or use “Spotify recommendations playlist” from settings."
+              );
+            }
+            const date = new Date().toISOString().slice(0, 10);
+            const created = await createSpotifyPlaylistWithTracks(access, uris, {
+              name: "Currents — Discogs picks — " + date,
+              description: "Suggested tracks from your Discogs collection (Currents).",
+              progressLabel: "Saving to Spotify… ",
+            });
+            const web = created.external_urls && created.external_urls.spotify;
+            setStatus(
+              web
+                ? "Added to Spotify (" + uris.length + " of " + src.tracks.length + " matched): " + web
+                : "Playlist added to your Spotify library (" + uris.length + " tracks)."
+            );
+          } catch (e) {
+            const m = e.message || "";
+            if (/Insufficient|403|scope/i.test(m)) {
+              setStatus(
+                "Spotify needs playlist permission. Disconnect Spotify, connect again, then try “Add to Spotify” once more.",
+                true
+              );
+            } else {
+              setStatus(m || "Could not add playlist to Spotify.", true);
+            }
+          } finally {
+            el.btnAddToSpotify.disabled = false;
             el.btnSaveSpotifyPlaylist.disabled = false;
             el.btnSpotifyRecs.disabled = false;
             el.btnLoad.disabled = false;
@@ -1059,6 +1819,30 @@
           return names.length ? names.join(", ") : "Unknown artist";
         }
 
+        function discogsTrackThumbFromListEntry(tr) {
+          const direct = (tr.thumbnail_url || tr.thumbnail || "").trim();
+          if (direct) return direct;
+          if (tr.images && tr.images.length) return discogsSmallestImage(tr.images);
+          return "";
+        }
+
+        function discogsSmallestImage(images) {
+          if (!images || !images.length) return "";
+          let best = (images[0].uri150 || images[0].uri || "").trim();
+          let bestW = images[0].width || 9999;
+          for (let i = 1; i < images.length; i++) {
+            const im = images[i];
+            const u = (im.uri150 || im.uri || "").trim();
+            if (!u) continue;
+            const w = im.width || 0;
+            if (w > 0 && w < bestW) {
+              bestW = w;
+              best = u;
+            }
+          }
+          return best;
+        }
+
         function playableTracksFromRelease(release) {
           const releaseArtists = releaseDefaultArtists(release);
           const tracklist = release.tracklist || [];
@@ -1077,7 +1861,8 @@
                 })
                 .join(", ");
             }
-            out.push({ artist: artist, title: title });
+            const trackThumb = discogsTrackThumbFromListEntry(tr);
+            out.push({ artist: artist, title: title, trackThumb: trackThumb });
           }
           return out;
         }
@@ -1088,16 +1873,18 @@
         }
 
         async function generatePlaylist(token) {
+          stopPlaylistPreview();
           el.playlistWrap.classList.add("hidden");
           el.playlistList.innerHTML = "";
-          playlistCopyText = "";
           spotifyCurrentPlaylistUris = null;
-          updateSpotifySavePlaylistButton();
+          discogsPlaylistSpotifySource = null;
+          updateSpotifyPlaylistActionButtons();
           el.btnPlaylist.disabled = true;
           el.btnLoad.disabled = true;
           el.btnSpotifyRecs.disabled = true;
           el.btnSpotifyConnect.disabled = true;
           el.btnSaveSpotifyPlaylist.disabled = true;
+          el.btnAddToSpotify.disabled = true;
 
           try {
             let entries = collectionCache;
@@ -1135,17 +1922,21 @@
               const rel = await discogsFetch("/releases/" + rid, token);
               const playable = playableTracksFromRelease(rel);
               const pick = pickRandom(playable);
+              const albumArt = discogsSmallestImage(rel.images) || collectionThumbUrl(entry);
               if (pick) {
+                const thumbUrl = (pick.trackThumb && pick.trackThumb.trim()) || albumArt;
                 tracks.push({
                   artist: pick.artist,
                   title: pick.title,
                   from: (collArtists || pick.artist) + " — " + releaseTitle,
+                  thumbUrl: thumbUrl,
                 });
               } else {
                 tracks.push({
                   artist: collArtists || releaseDefaultArtists(rel),
                   title: releaseTitle,
                   from: releaseTitle + " (release)",
+                  thumbUrl: albumArt,
                 });
               }
             }
@@ -1160,21 +1951,59 @@
               tracks.length +
               " track" +
               (tracks.length === 1 ? "" : "s") +
-              " chosen at random from your collection.";
-            const lines = [];
+              " chosen at random from your collection. The play button loads a 30-second Spotify preview when available (connect Spotify in settings).";
             for (let t = 0; t < tracks.length; t++) {
               const item = document.createElement("li");
+              item.className = "playlist-row-discogs";
               const tr = tracks[t];
               const line = tr.artist + " — " + tr.title;
-              lines.push(String(t + 1) + ". " + line);
-              item.innerHTML =
-                '<div class="track"></div><div class="from"></div>';
-              item.querySelector(".track").textContent = line;
-              item.querySelector(".from").textContent = "From: " + tr.from;
+              const thumbWrap = document.createElement("div");
+              thumbWrap.className = "playlist-thumb-wrap";
+              thumbWrap.setAttribute("aria-hidden", "true");
+              const thumbSrc = (tr.thumbUrl || "").trim();
+              if (thumbSrc) {
+                const img = document.createElement("img");
+                img.className = "playlist-thumb";
+                img.alt = "";
+                img.loading = "lazy";
+                img.decoding = "async";
+                img.src = thumbSrc;
+                thumbWrap.appendChild(img);
+              }
+              const textWrap = document.createElement("div");
+              textWrap.className = "playlist-row-text";
+              const trackLine = document.createElement("div");
+              trackLine.className = "track";
+              trackLine.textContent = line;
+              const fromLine = document.createElement("div");
+              fromLine.className = "from";
+              fromLine.textContent = "From: " + tr.from;
+              textWrap.appendChild(trackLine);
+              textWrap.appendChild(fromLine);
+              item.appendChild(thumbWrap);
+              item.appendChild(textWrap);
+              (function (artist, title) {
+                appendPlaylistPreviewControl(item, textWrap, {
+                  resolvePreview: async function () {
+                    if (!sessionStorage.getItem(SPOTIFY_REFRESH_KEY)) {
+                      throw new Error("Connect Spotify in settings to hear previews.");
+                    }
+                    const access = await getSpotifyAccessToken();
+                    return tryGetSpotifyTrackPreviewUrl(access, artist, title);
+                  },
+                });
+              })(tr.artist, tr.title);
               el.playlistList.appendChild(item);
             }
-            playlistCopyText = lines.join("\n");
+            discogsPlaylistSpotifySource = {
+              tracks: tracks.map(function (t) {
+                return { artist: t.artist, title: t.title };
+              }),
+            };
+            updateSpotifyPlaylistActionButtons();
             el.playlistWrap.classList.remove("hidden");
+            hideCollectionForPlaylistFocus();
+            setPlaylistButtonMode("refresh");
             setStatus("Playlist ready.");
           } catch (err) {
             setStatus(err.message || "Could not generate playlist.", true);
@@ -1184,6 +2013,7 @@
             el.btnSpotifyRecs.disabled = false;
             el.btnSpotifyConnect.disabled = false;
             el.btnSaveSpotifyPlaylist.disabled = false;
+            el.btnAddToSpotify.disabled = false;
           }
         }
 
@@ -1208,18 +2038,20 @@
         }
 
         async function loadCollection(token) {
+          stopPlaylistPreview();
           setStatus("Loading collection…");
           el.btnLoad.disabled = true;
           el.btnPlaylist.disabled = true;
           el.btnSpotifyRecs.disabled = true;
           el.btnSpotifyConnect.disabled = true;
           el.btnSaveSpotifyPlaylist.disabled = true;
-          el.collectionWrap.classList.add("hidden");
+          el.btnAddToSpotify.disabled = true;
+          setCollectionSectionExpanded(false);
           el.collectionList.innerHTML = "";
           el.playlistWrap.classList.add("hidden");
-          playlistCopyText = "";
           spotifyCurrentPlaylistUris = null;
-          updateSpotifySavePlaylistButton();
+          discogsPlaylistSpotifySource = null;
+          updateSpotifyPlaylistActionButtons();
 
           try {
             const all = await fetchCollectionReleases(token, function (p, total) {
@@ -1262,7 +2094,7 @@
               item.appendChild(textWrap);
               el.collectionList.appendChild(item);
             }
-            el.collectionWrap.classList.remove("hidden");
+            setCollectionSectionExpanded(true);
             setStatus("Collection loaded.");
           } catch (err) {
             setStatus(err.message || "Could not load collection.", true);
@@ -1272,8 +2104,15 @@
             el.btnSpotifyRecs.disabled = false;
             el.btnSpotifyConnect.disabled = false;
             el.btnSaveSpotifyPlaylist.disabled = false;
+            el.btnAddToSpotify.disabled = false;
           }
         }
+
+        el.btnToggleCollection.addEventListener("click", function () {
+          if (!username || el.btnToggleCollection.disabled) return;
+          const expanded = el.btnToggleCollection.getAttribute("aria-expanded") === "true";
+          setCollectionSectionExpanded(!expanded);
+        });
 
         el.btnConnect.addEventListener("click", async function () {
           const token = el.tokenInput.value.trim();
@@ -1290,6 +2129,7 @@
             sessionStorage.setItem(STORAGE_KEY, token);
             showConnected(user);
             await loadCollection(token);
+            closeDiscogsModal();
           } catch (err) {
             setStatus(err.message || "Connection failed.", true);
           } finally {
@@ -1297,10 +2137,29 @@
           }
         });
 
+        el.btnDiscogsMenu.addEventListener("click", function () {
+          if (isDiscogsModalOpen()) {
+            closeDiscogsModal();
+          } else {
+            openDiscogsModal();
+          }
+        });
+
+        el.btnDiscogsModalClose.addEventListener("click", closeDiscogsModal);
+
+        el.discogsModalBackdrop.addEventListener("click", closeDiscogsModal);
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && isDiscogsModalOpen()) {
+            closeDiscogsModal();
+          }
+        });
+
         el.btnDisconnect.addEventListener("click", function () {
           sessionStorage.removeItem(STORAGE_KEY);
           showLogin();
           setStatus("Signed out.");
+          closeDiscogsModal();
         });
 
         el.btnLoad.addEventListener("click", function () {
@@ -1321,22 +2180,30 @@
           generatePlaylist(token);
         });
 
-        el.btnCopyPlaylist.addEventListener("click", async function () {
-          if (!playlistCopyText) return;
-          try {
-            await navigator.clipboard.writeText(playlistCopyText);
-            setStatus("Playlist copied to clipboard.");
-          } catch {
-            setStatus("Could not copy automatically. Select the list and copy manually.", true);
-          }
-        });
-
         el.btnSaveSpotifyPlaylist.addEventListener("click", function () {
           if (!sessionStorage.getItem(SPOTIFY_REFRESH_KEY)) {
             setStatus("Connect Spotify first.", true);
             return;
           }
           saveRecommendationsToSpotifyPlaylist();
+        });
+
+        el.btnAddToSpotify.addEventListener("click", function () {
+          if (!sessionStorage.getItem(SPOTIFY_REFRESH_KEY)) {
+            setStatus("Connect Spotify first (Client ID + Connect Spotify in settings).", true);
+            return;
+          }
+          addDiscogsSuggestedToSpotify();
+        });
+
+        el.btnCopySpotifyRedirect.addEventListener("click", async function () {
+          const uri = redirectUri();
+          try {
+            await navigator.clipboard.writeText(uri);
+            setStatus("Redirect URI copied. Paste it into your Spotify app’s Redirect URIs list.");
+          } catch {
+            setStatus("Could not copy. Select the URI in the box and copy manually.", true);
+          }
         });
 
         el.btnSpotifyConnect.addEventListener("click", async function () {
@@ -1371,6 +2238,7 @@
         });
 
         el.btnSpotifyDisconnect.addEventListener("click", function () {
+          stopPlaylistPreview();
           clearSpotifySession();
           refreshSpotifyConnectionUI();
           el.spotifyUserLine.textContent = "";
