@@ -1238,6 +1238,7 @@
             .normalize("NFKD")
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
+            .replace(/\b(and)\b/g, " & ")
             .replace(/\([^)]*\)/g, " ")
             .replace(/\[[^\]]*\]/g, " ")
             .replace(/\b(feat|featuring|ft)\.?\b[^-;,/]*/g, " ")
@@ -1249,7 +1250,8 @@
 
         function spotifyTrackLooksLikeMatch(track, artist, title) {
           const normalizedTitle = normalizeSpotifySearchText(title);
-          const normalizedArtist = normalizeSpotifySearchText(artist).split(" ")[0] || "";
+          const normalizedArtist = normalizeSpotifySearchText(artist);
+          const normalizedArtistFirst = normalizedArtist.split(" ")[0] || "";
           const trackName = normalizeSpotifySearchText(track && track.name);
           const artistNames = normalizeSpotifySearchText(
             ((track && track.artists) || [])
@@ -1264,7 +1266,12 @@
             trackName.indexOf(normalizedTitle) !== -1 ||
             normalizedTitle.indexOf(trackName) !== -1;
           if (!titleLooksClose) return false;
-          return !normalizedArtist || artistNames.indexOf(normalizedArtist) !== -1;
+          if (!normalizedArtist) return true;
+          return (
+            artistNames.indexOf(normalizedArtist) !== -1 ||
+            normalizedArtist.indexOf(artistNames) !== -1 ||
+            artistNames.indexOf(normalizedArtistFirst) !== -1
+          );
         }
 
         async function searchSpotifyTrackItems(accessToken, artist, title) {
@@ -1298,9 +1305,11 @@
               primaryArtistRaw + " " + trackTitleRaw,
               trackTitleRaw + " " + primaryArtistRaw,
               'track:"' + trackTitleRaw + '"',
+              trackTitleRaw,
               'artist:"' + primaryArtist + '" track:"' + trackTitle + '"',
               primaryArtist + " " + trackTitle,
               'track:"' + trackTitle + '"',
+              trackTitle,
             ];
             if (rawShortTitle && rawShortTitle !== trackTitleRaw) {
               queries.push(primaryArtistRaw + " " + rawShortTitle);
@@ -1330,9 +1339,15 @@
             if (!combined.length) return [];
             const ranked = combined
               .map(function (it) {
+                const normalizedTrack = normalizeSpotifySearchText(it && it.name);
+                const normalizedTitleRaw = normalizeSpotifySearchText(trackTitleRaw);
+                const exactTitle = normalizedTrack && normalizedTrack === normalizedTitleRaw;
                 return {
                   item: it,
-                  score: spotifyTrackLooksLikeMatch(it, primaryArtistRaw, trackTitleRaw) ? 2 : 1,
+                  score:
+                    (spotifyTrackLooksLikeMatch(it, primaryArtistRaw, trackTitleRaw) ? 3 : 0) +
+                    (exactTitle ? 2 : 0) +
+                    (it && it.popularity ? it.popularity / 1000 : 0),
                 };
               })
               .sort(function (a, b) {
