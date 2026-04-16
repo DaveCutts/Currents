@@ -1354,8 +1354,8 @@
           const noPreviewAvailable = !hasFixedUrl && !canResolve;
 
           if (noPreviewAvailable) {
-            btn.disabled = true;
             btn.classList.add("playlist-preview-btn--disabled");
+            btn.setAttribute("aria-disabled", "true");
             btn.title = "No preview available";
             btn.dataset.previewDisabledReason = "No preview available for this track.";
           } else if (canResolve) {
@@ -1365,7 +1365,7 @@
           }
 
           btn.addEventListener("click", async function () {
-            if (btn.disabled && !canResolve) {
+            if (btn.getAttribute("aria-disabled") === "true" && !canResolve) {
               setStatus(btn.dataset.previewDisabledReason || "No preview available for this track.", true);
               return;
             }
@@ -1382,8 +1382,8 @@
               if (url) {
                 item.dataset.previewUrl = url;
               } else {
-                btn.disabled = true;
                 btn.classList.add("playlist-preview-btn--disabled");
+                btn.setAttribute("aria-disabled", "true");
                 btn.title = "No preview available";
                 btn.dataset.previewDisabledReason = "Spotify doesn't provide a preview clip for this track.";
                 setStatus(btn.dataset.previewDisabledReason, true);
@@ -1408,12 +1408,17 @@
             try {
               await audio.play();
               setStatus("Playing 30-second preview.");
-            } catch {
-              setStatus(
-                "Could not play preview. If you're on iOS/Safari, try unmuting the device and tapping play again.",
-                true
-              );
+            } catch (err) {
               stopPlaylistPreview();
+              const opened = window.open(url, "_blank", "noopener,noreferrer");
+              if (opened) {
+                setStatus("In-page audio was blocked. Opened preview in a new tab.");
+              } else {
+                setStatus(
+                  "Could not play preview. If you're on iOS/Safari, unmute device and tap again.",
+                  true
+                );
+              }
             }
           });
 
